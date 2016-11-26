@@ -14,7 +14,7 @@
 #define _ph A1 //pin for photoresistor
 
 int led = 7;
-char auth[] = "363efae0e2974c0898dbeafbea25fe49"; //Blynk authorization token
+char auth[] = ""; //Blynk authorization token
 
 byte _ip[] = {192, 168, 43, 30}; //_ip address
 byte _mac[] = {0x90, 0xA2, 0xDA, 0x10, 0x8A, 0x1A}; //_mac address toy Ethernet Shield
