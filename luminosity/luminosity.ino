@@ -1,4 +1,4 @@
-#define _ph A1 //pin for photoresistor
+#define _ph A0 //pin for photoresistor
 void setup()
 {
   Serial.begin(9600);
