@@ -9,24 +9,26 @@
 #include <SPI.h>
 #include <Ethernet2.h>
 #include <BlynkSimpleEthernet2.h>
+#include <SimpleTimer.h>
 
 #define _soil A0 //pin for soil hygrometer sensor
 #define _ph A1 //pin for photoresistor
 
-#define _pump 12 // pin of the motor(liquid pump)
-#define _pumpbr 9// pin of the motor's brake
+#define _pump 6 // pin of the motor(liquid pump)
+#define _pumpbr 5// pin of the motor's brake
 #define _pumps 3 //pin for speed
 
 int led = 7;
 char auth[] = ""; //Blynk authorization token
 
-byte _ip[] = { 192, 168, 30, 234}; //_ip address
 byte _mac[] = {0x90, 0xA2, 0xDA, 0x10, 0x8A, 0x1A}; //_mac address toy Ethernet Shield
-byte _mask[] = {255, 255, 255, 0}; //μάσκα του δικτύου
+SimpleTimer timer;
+EthernetClient client;
 
 BLYNK_WRITE(V2) //Button Widget is writing to pin V2
 {
   int state = param.asInt(); //αποθήκευση της κατάστασης που στέλνεται από ένα button
+  Serial.println(state);
   if(state == 1)// αν η κατάσταση είναι 1, 
   {
     digitalWrite(led,HIGH);//τότε ανάβει το Led στην διάταξη
@@ -61,32 +63,32 @@ int luminanceCalc() //function to calculate the luminance
   return lum; //return luminosity
 }
 
+void myTimerEvent()
+{
+  Blynk.virtualWrite(V0, moistureCalc());
+  Blynk.virtualWrite(V1, luminanceCalc());
+}
+
 void setup()
 {
-  //Serial.begin(9600);
-  Ethernet.begin(_mac, _ip, _mask); //
+  Serial.begin(9600);
+  Ethernet.begin(_mac); 
   Blynk.begin(auth); //begin connection with Blynk Server
-  pinMode(led, HIGH);
+  pinMode(led, OUTPUT); //define led as output
 
-  pinMode(_soil, INPUT);
-  pinMode(_ph, INPUT); 
+  pinMode(_soil, INPUT); //define soil hygrometer as input
+  pinMode(_ph, INPUT); //define photoresistor as input
   
-  pinMode(_pump, OUTPUT);
+  /*pinMode(_pump, OUTPUT);
   pinMode(_pumpbr, OUTPUT);
   digitalWrite(_pumpbr, LOW);
-  digitalWrite(_pump, LOW);
-  // You can also specify server.
-  // For more options, see BoardsAndShields/Arduino_Ethernet_Manual example
-  //Blynk.begin(auth, "your_server.com", 8442);
-  //Blynk.begin(auth, _ipAddress(192,168,1,100), 8888);
+  digitalWrite(_pump, LOW);*/
+  timer.setInterval(1000L, myTimerEvent); //call method myTimerEvent every 1 sec
 }
 
 void loop()
 {
-  Blynk.virtualWrite(V0, moistureCalc());
-  Blynk.virtualWrite(V1, luminanceCalc());
-  delay(1000);
   Blynk.run(); //this is used in order to keep communication up
-  //delay(15);
+  timer.run();
 }
 
